@@ -27,7 +27,7 @@ public class APIAlerts {
     /// Example:
     /// ```
     /// APIAlerts.client.send(
-    ///     apiKey: "",
+    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
     ///     message: "Swift package test",
     ///     tags: ["swift", "apple"],
     ///     link: "https://developer.apple.com/documentation/swift"

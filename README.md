@@ -22,7 +22,7 @@ Add the following to your `Package.swift` dependencies
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/apialerts/APIAlerts-Swift.git", exact: "0.0.1")
+        .package(url: "https://github.com/apialerts/APIAlerts-Swift.git", exact: "0.0.2")
     ],
     targets: [
         .target(

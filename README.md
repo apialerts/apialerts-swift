@@ -1,6 +1,13 @@
 # API Alerts - Swift
 
-In development. NOT ready for production use
+In development. NOT ready for production use!
+
+APIAlerts require the use of API Keys to integrate with your projects.
+
+Copy your API Key from the projects page in the mobile app.
+
+Android App - https://play.google.com/store/apps/details?id=com.apialerts
+iOS/Mac App - https://apps.apple.com/us/app/magpie-api-alerts/id6476410789
 
 
 ## Installation
@@ -34,7 +41,7 @@ let package = Package(
     ]
 ```
 
-## Configure
+### Configure
 
 Import the APIAlerts package
 
@@ -42,15 +49,15 @@ Import the APIAlerts package
 import APIAlerts
 ```
 
-#### Simple usage
+### Simple usage
 
-Quick one-liner to send a notification to your connected devices
+Quick one-liner to send a notification to your connected devices.
 
 ```swift
 APIAlerts.client.send(apiKey: "your-api-key", message: "New App User!")
 ```
 
-#### Advanced usage
+### Advanced usage
 
 Set a default API Key for all send() calls.
 Provide an apiKey to send if you have multiple projects and want to send specific events to different projects.
@@ -63,11 +70,12 @@ APIAlerts.client.configure(
 
 // Call send() without an apiKey parameter
 APIAlerts.client.send(message: "New App User!")
-// or
+
+// Or, provide an override for the default API Key
 APIAlerts.client.send(apiKey: "your-other-api-key", message: "New App User!")
 ```
 
-#### Optional Properties
+### Optional Properties
 ```swift
 APIAlerts.client.send(
     message: "New App User!",

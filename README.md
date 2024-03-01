@@ -44,7 +44,7 @@ let package = Package(
     ]
 ```
 
-### Configure
+## Usage
 
 Import the APIAlerts package
 
@@ -52,7 +52,7 @@ Import the APIAlerts package
 import APIAlerts
 ```
 
-### Simple usage
+### Simple
 
 Quick one-liner to send a notification to your connected devices.
 
@@ -60,7 +60,7 @@ Quick one-liner to send a notification to your connected devices.
 APIAlerts.client.send(apiKey: "your-api-key", message: "New App User!")
 ```
 
-### Advanced usage
+### Advanced
 
 Set a default API Key for all send() calls.
 Provide an apiKey to send if you have multiple projects and want to send specific events to different projects.
@@ -68,7 +68,7 @@ Provide an apiKey to send if you have multiple projects and want to send specifi
 ```swift
 // Set the default api key to use in all send() calls at any time in your app
 APIAlerts.client.configure(
-    apiKey: "youkey"
+    apiKey: "your-api-key"
 )
 
 // Call send() without an apiKey parameter

@@ -6,9 +6,12 @@ APIAlerts require the use of API Keys to integrate with your projects.
 
 Copy your API Key from the projects page in the mobile app.
 
-Android App - https://play.google.com/store/apps/details?id=com.apialerts
-iOS/Mac App - https://apps.apple.com/us/app/magpie-api-alerts/id6476410789
+Get the App
+- Android - [Play Store](https://play.google.com/store/apps/details?id=com.apialerts)
+- iOS/Mac - [App Store](https://apps.apple.com/us/app/magpie-api-alerts/id6476410789)
 
+Links
+- [Integrations](https://apialerts.com/integrations)
 
 ## Installation
 

@@ -1,7 +1,5 @@
 # API Alerts - Swift
 
-In development. NOT ready for production use!
-
 APIAlerts require the use of API Keys to integrate with your projects.
 
 Copy your API Key from the projects page in the mobile app.
@@ -21,7 +19,7 @@ Available only as a SPM package from github
 
 import the library
 ```
-https://github.com/apialerts/APIAlerts-Swift.git
+https://github.com/apialerts/apialerts-swift.git
 ```
 
 ### Swift Package.swift

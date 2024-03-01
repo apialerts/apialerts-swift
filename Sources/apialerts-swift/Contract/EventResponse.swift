@@ -9,7 +9,6 @@ import Foundation
 
 struct EventResponse: Codable {
     let project: String?
-    // let uuid: String?
     let remainingQuota: Int?
     let errors: [String]?
 }

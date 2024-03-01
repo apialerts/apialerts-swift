@@ -32,13 +32,13 @@ Add the following to your `Package.swift` dependencies
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/apialerts/APIAlerts-Swift.git", exact: "0.0.2")
+        .package(url: "https://github.com/apialerts/apialerts-swift.git", exact: "0.0.3")
     ],
     targets: [
         .target(
             ...
             dependencies: [
-                .product(name: "APIAlerts", package: "APIAlerts-Swift"),
+                .product(name: "APIAlerts", package: "apialerts-swift"),
             ]
         )
     ]

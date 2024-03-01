@@ -7,7 +7,7 @@ public class APIAlerts {
     
     public static let client = APIAlerts()
     
-    public init() {}
+    private init() {}
     
     private var commonApiKey: String? = nil
     private var showLogs: Bool = false

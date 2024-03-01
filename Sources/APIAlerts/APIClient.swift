@@ -29,21 +29,9 @@ enum HttpMethod: String {
     case delete = "DELETE"
 }
 
-public class ApiClient {
-    public static let shared = ApiClient()
+struct ApiClient {
 
-    private init() {}
-
-    private func buildHeaders(_ apiKey: String) async -> [String: String] {
-        var headers = [String: String]()
-        headers["Authorization"] = "Bearer \(apiKey)"
-        headers["Content-Type"] = "application/json"
-        headers["X-Integration"] = INTEGRATION_NAME
-        headers["X-Version"] = INTEGRATION_VERSION
-        return headers
-    }
-
-    func request<T: Codable>(apiKey: String, method: HttpMethod, path: String, body: Data? = nil) async -> (Result<T, ErrorObject>) {
+    static func request<T: Codable>(apiKey: String, method: HttpMethod, path: String, body: Data? = nil) async -> (Result<T, ErrorObject>) {
         guard let url = URL(string: API_URL + path) else {
             let output = ErrorObject(
                 statusCode: 0,
@@ -54,7 +42,14 @@ public class ApiClient {
         
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
-        request.allHTTPHeaderFields = await buildHeaders(apiKey)
+        
+        var headers = [String: String]()
+        headers["Authorization"] = "Bearer \(apiKey)"
+        headers["Content-Type"] = "application/json"
+        headers["X-Integration"] = INTEGRATION_NAME
+        headers["X-Version"] = INTEGRATION_VERSION
+        
+        request.allHTTPHeaderFields = headers
 
         if let body = body {
             request.httpBody = body

@@ -32,7 +32,7 @@ Add the following to your `Package.swift` dependencies
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/apialerts/apialerts-swift.git", exact: "0.0.3")
+        .package(url: "https://github.com/apialerts/apialerts-swift.git", exact: "1.0.0")
     ],
     targets: [
         .target(

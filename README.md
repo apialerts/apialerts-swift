@@ -30,7 +30,7 @@ Add the following to your `Package.swift` dependencies
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/apialerts/apialerts-swift.git", exact: "1.0.0")
+        .package(url: "https://github.com/apialerts/apialerts-swift.git", exact: "1.0.1")
     ],
     targets: [
         .target(

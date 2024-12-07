@@ -2,7 +2,7 @@
 
 Swift client for the [apialerts.com](https://apialerts.com/) platform
 
-[Docs](https://apialerts.com/docs/swift) • [GitHub](https://github.com/apialerts/apialerts-swift)
+[Docs](https://apialerts.com/docs/swift) • [GitHub](https://github.com/apialerts/apialerts-swift) • [Swift Package Index](https://swiftpackageindex.com/apialerts/apialerts-swift)
 
 ## Installation
 
@@ -61,10 +61,10 @@ Additional event properties can be set using the optional parameters.
 
 ```swift
 APIAlerts.client.send(
-    apiKey: "your-api-key",  // Optional, uses the key from ApiAlerts.client.configure() if not provided
+    apiKey: "your-api-key",        // Optional, uses the key from ApiAlerts.client.configure() if not provided
     message: "New App User!",
-    tags: ["tag1", "tag2"],
-    link: "https://apialerts.com/integrations"
+    tags: ["tag1", "tag2"],        // Optional tags
+    link: "https://apialerts.com"  // Optional link
 )
 ```
 

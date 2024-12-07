@@ -1,5 +1,8 @@
 # apialerts-swift
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fapialerts%2Fapialerts-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/apialerts/apialerts-swift)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fapialerts%2Fapialerts-swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/apialerts/apialerts-swift)
+
 Swift client for the [apialerts.com](https://apialerts.com/) platform
 
 [Docs](https://apialerts.com/docs/swift) • [GitHub](https://github.com/apialerts/apialerts-swift) • [Swift Package Index](https://swiftpackageindex.com/apialerts/apialerts-swift)

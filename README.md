@@ -25,7 +25,7 @@ let package = Package(
 ```
 
 or install it via your xcode project
-```
+```bash
 https://github.com/apialerts/apialerts-swift.git
 ```
 
@@ -69,3 +69,7 @@ APIAlerts.client.send(
 ```
 
 The API Key provided in the send() function can be different from the default API Key set in the configure() function. This allows you to send events to different workspaces without changing the default API Key or managing multiple instances of the client.
+
+### Feedback & Support
+
+If you have any questions or feedback, please create an issue on our GitHub repository. We are always looking to improve our service and would love to hear from you. Thanks for using API Alerts!

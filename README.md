@@ -1,4 +1,4 @@
-# API Alerts - Swift
+# apialerts-swift
 
 Swift client for the [apialerts.com](https://apialerts.com/) platform
 

@@ -32,7 +32,6 @@ public class APIAlertsClient {
     /// debug: Boolean Set to true to enable debug logging
     /// Returns: Void
     public func configure(apiKey: String, debug: Bool = false) {
-        print("alerts.configure")
         alerts.configure(apiKey: apiKey, debug: debug)
     }
 
@@ -57,7 +56,6 @@ public class APIAlertsClient {
     /// link: Optional link to associate with the message
     /// Returns: Void
     public func send(apiKey: String? = nil, channel: String? = nil, message: String, tags: [String]? = nil, link: String? = nil) {
-        print("alerts.send")
         alerts.send(apiKey: apiKey, channel: channel, message: message, tags: tags, link: link)
     }
 
@@ -83,7 +81,6 @@ public class APIAlertsClient {
     /// link: A link to associate with the message
     /// Returns: Void
     public func sendAsync(apiKey: String? = nil, channel: String? = nil, message: String, tags: [String]? = nil, link: String? = nil) async {
-        print("alerts.sendAsync")
         await alerts.sendAsync(apiKey: apiKey, channel: channel, message: message, tags: tags, link: link)
     }
 }

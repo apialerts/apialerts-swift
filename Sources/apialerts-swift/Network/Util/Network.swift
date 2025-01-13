@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 
-struct ApiClient {
+struct Network {
 
     static func request<T: Codable>(apiKey: String, method: HttpMethod, path: String, body: Data? = nil) async -> (Result<T, ErrorObject>) {
         guard let url = URL(string: API_URL + path) else {

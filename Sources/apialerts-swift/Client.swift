@@ -10,13 +10,11 @@ class ClientImpl: Client {
     private var debug: Bool = false
 
     func configure(apiKey: String, debug: Bool) {
-        print("configure")
         self.defaultKey = apiKey
         self.debug = debug
     }
 
     func send(apiKey: String?, channel: String?, message: String, tags: [String]?, link: String?) {
-        print("send")
         Task {
             await sendAsync(
                 apiKey: apiKey,
@@ -29,7 +27,6 @@ class ClientImpl: Client {
     }
 
     func sendAsync(apiKey: String?, channel: String?, message: String, tags: [String]?, link: String?) async {
-        print("sendAsync")
         let useKey = apiKey ?? defaultKey ?? ""
         
         if useKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

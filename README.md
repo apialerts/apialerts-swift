@@ -42,7 +42,7 @@ import APIAlerts
 ...
 
 // Set the default api key to use in all send() calls at any time in your app
-APIAlerts.client.configure(
+APIAlerts.configure(
     apiKey: "your-api-key"
 )
 ```
@@ -54,7 +54,7 @@ Configuring the client is optional, but it allows you to set a default API Key f
 Quick one-liner to send a notification to your connected devices.
 
 ```swift
-APIAlerts.client.send(
+APIAlerts.send(
     apiKey: "your-api-key",  // Optional, uses the key from ApiAlerts.client.configure() if not provided
     message: "New App User!"
 )
@@ -63,7 +63,7 @@ APIAlerts.client.send(
 Additional event properties can be set using the optional parameters.
 
 ```swift
-APIAlerts.client.send(
+APIAlerts.send(
     apiKey: "your-api-key",        // Optional, uses the key from ApiAlerts.client.configure() if not provided
     message: "New App User!",
     tags: ["tag1", "tag2"],        // Optional tags

@@ -2,26 +2,6 @@ import Combine
 import Foundation
 import SwiftUI
 
-func getEncoder() -> JSONEncoder {
-    let encoder = JSONEncoder()
-    encoder.keyEncodingStrategy = .useDefaultKeys
-    encoder.dateEncodingStrategy = .iso8601
-    return encoder
-}
-
-func getDecoder() -> JSONDecoder {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return decoder
-}
-
-enum HttpMethod: String {
-    case get = "GET"
-    case post = "POST"
-    case put = "PUT"
-    case delete = "DELETE"
-}
-
 struct ApiClient {
 
     static func request<T: Codable>(apiKey: String, method: HttpMethod, path: String, body: Data? = nil) async -> (Result<T, ErrorObject>) {

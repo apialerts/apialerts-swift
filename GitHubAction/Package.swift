@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Sample",
+    name: "GitHubAction",
     platforms: [
         .iOS(.v14),
         .macOS(.v11)
@@ -14,7 +14,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "Sample",
+            name: "GitHubAction",
             dependencies: [
                 .product(name: "APIAlerts", package: "apialerts-swift")
             ]

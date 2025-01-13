@@ -42,36 +42,40 @@ import APIAlerts
 ...
 
 // Set the default api key to use in all send() calls at any time in your app
-APIAlerts.client.configure(
+APIAlerts.configure(
     apiKey: "your-api-key"
 )
 ```
 
 Configuring the client is optional, but it allows you to set a default API Key for all send() calls. You must set an API key in the send() call if you do not configure the client.
 
-### Send Event
+### Send Events
 
 Quick one-liner to send a notification to your connected devices.
 
 ```swift
-APIAlerts.client.send(
-    apiKey: "your-api-key",  // Optional, uses the key from ApiAlerts.client.configure() if not provided
-    message: "New App User!"
+APIAlerts.send(
+    apiKey: "your-api-key",   // Optional, uses the key from ApiAlerts.client.configure() if not provided
+    channel: "your-channel",  // Optional, uses the default channel if not provided
+    message: "New App User!"  // Required
 )
 ```
 
 Additional event properties can be set using the optional parameters.
 
 ```swift
-APIAlerts.client.send(
+APIAlerts.send(
     apiKey: "your-api-key",        // Optional, uses the key from ApiAlerts.client.configure() if not provided
-    message: "New App User!",
+    channel: "your-channel",       // Optional, uses the default channel if not provided
+    message: "New App User!",      // Required
     tags: ["tag1", "tag2"],        // Optional tags
     link: "https://apialerts.com"  // Optional link
 )
 ```
 
 The API Key provided in the send() function can be different from the default API Key set in the configure() function. This allows you to send events to different workspaces without changing the default API Key or managing multiple instances of the client.
+
+The APIAlerts.sendAsync methods are also available if you need to wait for a successful execution. However, the send() functions are generally always preferred.
 
 ### Feedback & Support
 

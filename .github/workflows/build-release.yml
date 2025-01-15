@@ -1,13 +1,12 @@
-name: Pull Request
-
+name: Release
 on:
-  pull_request:
+  push:
     branches:
       - main
 
 jobs:
   build:
-    name: Build and Test
+    name: Build for release
     runs-on: macos-15
     steps:
       - name: Checkout code
@@ -18,8 +17,8 @@ jobs:
           xcode-version: '16.0'
       - name: Test
         run: swift test
-      - name: Send Build Alert
+      - name: Send Release Alert
         working-directory: ./GitHubAction
-        run: swift build && swift run GitHubAction --build
+        run: swift build && swift run GitHubAction --release
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

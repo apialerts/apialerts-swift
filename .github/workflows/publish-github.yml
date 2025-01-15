@@ -5,24 +5,11 @@ on:
 
 jobs:
   build:
-    name: Build and Publish
-    runs-on: macos-15
+    name: Publish
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1  #https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
-        with:
-          xcode-version: '16.0'
-      - name: Test
-        run: swift test
-      - name: Send Build Alert
-        run: swift build && swift run GitHubAction --release
-        working-directory: ./GitHubAction
-        env:
-          APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}
       - name: Send Publish Alert
-        run: swift build && swift run GitHubAction --publish
         working-directory: ./GitHubAction
+        run: swift build && swift run GitHubAction --publish
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

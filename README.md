@@ -1,11 +1,9 @@
-# apialerts-swift
+# API Alerts • Swift Client
 
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fapialerts%2Fapialerts-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/apialerts/apialerts-swift)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fapialerts%2Fapialerts-swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/apialerts/apialerts-swift)
 
-Swift client for the [apialerts.com](https://apialerts.com/) platform
-
-[Docs](https://apialerts.com/docs/swift) • [GitHub](https://github.com/apialerts/apialerts-swift) • [Swift Package Index](https://swiftpackageindex.com/apialerts/apialerts-swift)
+[GitHub](https://github.com/apialerts/apialerts-swift) • [Swift Package Index](https://swiftpackageindex.com/apialerts/apialerts-swift)
 
 ## Installation
 
@@ -76,7 +74,3 @@ APIAlerts.send(
 The API Key provided in the send() function can be different from the default API Key set in the configure() function. This allows you to send events to different workspaces without changing the default API Key or managing multiple instances of the client.
 
 The APIAlerts.sendAsync methods are also available if you need to wait for a successful execution. However, the send() functions are generally always preferred.
-
-### Feedback & Support
-
-If you have any questions or feedback, please create an issue on our GitHub repository. We are always looking to improve our service and would love to hear from you. Thanks for using API Alerts!

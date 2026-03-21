@@ -19,9 +19,11 @@ Or in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apialerts/apialerts-swift", from: "2.0.0")
+    .package(url: "https://github.com/apialerts/apialerts-swift", exact: "2.0.0")
 ]
 ```
+
+> We recommend pinning to an exact version.
 
 ## Quick Start
 
@@ -29,10 +31,7 @@ dependencies: [
 import APIAlerts
 
 APIAlerts.configure("your-api-key")
-let result = await APIAlerts.sendAsync(Event(message: "Deploy complete"))
-if result.success {
-    print("Sent to \(result.workspace ?? "") (\(result.channel ?? "")")
-}
+await APIAlerts.send(Event(message: "Deploy complete"))
 ```
 
 ## Usage
@@ -49,12 +48,14 @@ APIAlerts.configure("your-api-key")
 // Fire-and-forget — never throws, logs errors to stderr
 await APIAlerts.send(Event(message: "Deploy complete"))
 
-// Or get the result back — never throws, check result.success
+// Or get the result back
 let result = await APIAlerts.sendAsync(Event(message: "Deploy complete"))
-if result.success {
-    print("Sent to \(result.workspace ?? "") (\(result.channel ?? "")")
-} else {
-    print("Error: \(result.error ?? "unknown")")
+switch result {
+case .success(let sent):
+    print("Sent to \(sent.workspace) (\(sent.channel))")
+    for warning in sent.warnings { print("Warning: \(warning)") }
+case .failure(let error):
+    print("Error: \(error.localizedDescription)")
 }
 ```
 
@@ -77,8 +78,11 @@ Use `ApiAlertsClient` directly when you need multiple clients or full lifecycle 
 ```swift
 let client = ApiAlertsClient("your-api-key", debug: true)
 let result = await client.sendAsync(Event(message: "Deploy complete"))
-if result.success {
-    print("Sent to \(result.workspace ?? "") (\(result.channel ?? "")")
+switch result {
+case .success(let sent):
+    print("Sent to \(sent.workspace) (\(sent.channel))")
+case .failure(let error):
+    print("Error: \(error.localizedDescription)")
 }
 ```
 

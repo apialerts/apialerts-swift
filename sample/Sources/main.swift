@@ -21,60 +21,53 @@ APIAlerts.configure(apiKey)
 
 let link = "https://github.com/apialerts/apialerts-swift/actions"
 
+func handleResult(_ result: Result<SendResult, ApiAlertsError>) {
+    switch result {
+    case .success(let sent):
+        print("✓ Sent to \(sent.workspace) (\(sent.channel))")
+    case .failure(let error):
+        fputs("Error: \(error.localizedDescription)\n", stderr)
+        exit(1)
+    }
+}
+
 if isBuild {
-    let result = await APIAlerts.sendAsync(Event(
+    handleResult(await APIAlerts.sendAsync(Event(
         message: "Swift SDK - PR build success",
         channel: "developer",
         event: "ci.build",
         title: "Build Passed",
         tags: ["CI/CD", "Swift", "Build"],
         link: link
-    ))
-    if result.success {
-        print("✓ Sent to \(result.workspace ?? "") (\(result.channel ?? ""))")
-    } else {
-        fputs("Error: \(result.error ?? "unknown")\n", stderr)
-        exit(1)
-    }
+    )))
 
 } else if isRelease {
-    let result = await APIAlerts.sendAsync(Event(
+    handleResult(await APIAlerts.sendAsync(Event(
         message: "Swift SDK - Build for publish success",
         channel: "developer",
         event: "ci.release",
         title: "Release Build Passed",
         tags: ["CI/CD", "Swift", "Build"],
         link: link
-    ))
-    if result.success {
-        print("✓ Sent to \(result.workspace ?? "") (\(result.channel ?? ""))")
-    } else {
-        fputs("Error: \(result.error ?? "unknown")\n", stderr)
-        exit(1)
-    }
+    )))
 
 } else if isPublish {
-    let result = await APIAlerts.sendAsync(Event(
+    handleResult(await APIAlerts.sendAsync(Event(
         message: "Swift SDK - Swift Package Index publish success",
         channel: "releases",
         event: "ci.publish",
         title: "Published",
         tags: ["CI/CD", "Swift", "Deploy"],
         link: link
-    ))
-    if result.success {
-        print("✓ Sent to \(result.workspace ?? "") (\(result.channel ?? ""))")
-    } else {
-        fputs("Error: \(result.error ?? "unknown")\n", stderr)
-        exit(1)
-    }
+    )))
 
 } else if isIntegrationTests {
     let minimal = await APIAlerts.sendAsync(Event(message: "Swift SDK - minimal", channel: channel))
-    if minimal.success {
-        print("✓ sent to \(minimal.workspace ?? "") (\(minimal.channel ?? ""))")
-    } else {
-        fputs("Error (minimal): \(minimal.error ?? "unknown")\n", stderr)
+    switch minimal {
+    case .success(let sent):
+        print("✓ sent to \(sent.workspace) (\(sent.channel))")
+    case .failure(let error):
+        fputs("Error (minimal): \(error.localizedDescription)\n", stderr)
         exit(1)
     }
 
@@ -86,12 +79,15 @@ if isBuild {
         tags: ["CI/CD", "Swift"],
         link: link
     ))
-    if full.success {
-        print("✓ sent to \(full.workspace ?? "") (\(full.channel ?? ""))")
-    } else {
-        fputs("Error (full): \(full.error ?? "unknown")\n", stderr)
+    switch full {
+    case .success(let sent):
+        print("✓ sent to \(sent.workspace) (\(sent.channel))")
+        for w in sent.warnings { print("! Warning: \(w)") }
+    case .failure(let error):
+        fputs("Error (full): \(error.localizedDescription)\n", stderr)
         exit(1)
     }
+
 } else {
     fputs("Error: pass --build, --release, --publish, or --integration-tests\n", stderr)
     exit(1)

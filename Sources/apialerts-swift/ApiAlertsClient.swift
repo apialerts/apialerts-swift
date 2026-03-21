@@ -29,56 +29,41 @@ public final class ApiAlertsClient: Sendable {
             return
         }
         let result = await network.post(apiKey: apiKey, event: event)
-        if debug {
-            if result.success {
-                print("✓ (apialerts.com) Alert sent to \(result.workspace ?? "") (\(result.channel ?? ""))")
-                for warning in result.warnings {
-                    print("! (apialerts.com) Warning: \(warning)")
-                }
-            } else {
-                fputs("x (apialerts.com) Error: \(result.error ?? "unknown error")\n", stderr)
-            }
-        }
+        if debug { logResult(result) }
     }
 
+    /// Returns a `Result` — `.success(SendResult)` on delivery, `.failure(ApiAlertsError)` otherwise.
     @discardableResult
-    public func sendAsync(_ event: Event) async -> SendResult {
+    public func sendAsync(_ event: Event) async -> Result<SendResult, ApiAlertsError> {
         guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "api key is missing")
+            return .failure(.apiKeyMissing)
         }
         guard !event.message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "message is required")
+            return .failure(.messageRequired)
         }
         let result = await network.post(apiKey: apiKey, event: event)
-        if debug {
-            if result.success {
-                print("✓ (apialerts.com) Alert sent to \(result.workspace ?? "") (\(result.channel ?? ""))")
-                for warning in result.warnings {
-                    print("! (apialerts.com) Warning: \(warning)")
-                }
-            } else {
-                fputs("x (apialerts.com) Error: \(result.error ?? "unknown error")\n", stderr)
-            }
-        }
+        if debug { logResult(result) }
         return result
     }
 
+    /// Returns a `Result` using an explicit API key override.
     @discardableResult
-    public func sendWithKey(_ apiKey: String, event: Event) async -> SendResult {
+    public func sendWithKey(_ apiKey: String, event: Event) async -> Result<SendResult, ApiAlertsError> {
         guard !event.message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "message is required")
+            return .failure(.messageRequired)
         }
         let result = await network.post(apiKey: apiKey, event: event)
-        if debug {
-            if result.success {
-                print("✓ (apialerts.com) Alert sent to \(result.workspace ?? "") (\(result.channel ?? ""))")
-                for warning in result.warnings {
-                    print("! (apialerts.com) Warning: \(warning)")
-                }
-            } else {
-                fputs("x (apialerts.com) Error: \(result.error ?? "unknown error")\n", stderr)
-            }
-        }
+        if debug { logResult(result) }
         return result
+    }
+
+    private func logResult(_ result: Result<SendResult, ApiAlertsError>) {
+        switch result {
+        case .success(let r):
+            print("✓ (apialerts.com) Alert sent to \(r.workspace) (\(r.channel))")
+            for w in r.warnings { print("! (apialerts.com) Warning: \(w)") }
+        case .failure(let error):
+            fputs("x (apialerts.com) Error: \(error.localizedDescription)\n", stderr)
+        }
     }
 }

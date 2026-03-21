@@ -18,9 +18,9 @@ struct Network {
         self.baseUrl = baseUrl
     }
 
-    func post(apiKey: String, event: Event) async -> SendResult {
+    func post(apiKey: String, event: Event) async -> Result<SendResult, ApiAlertsError> {
         guard let url = URL(string: baseUrl + "/event") else {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "invalid response from server")
+            return .failure(.invalidResponse)
         }
 
         var request = URLRequest(url: url)
@@ -33,7 +33,7 @@ struct Network {
         do {
             request.httpBody = try JSONEncoder().encode(EventRequest(from: event))
         } catch {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "invalid response from server")
+            return .failure(.invalidResponse)
         }
 
         let data: Data
@@ -41,37 +41,30 @@ struct Network {
         do {
             (data, response) = try await session.data(for: request)
         } catch {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: error.localizedDescription)
+            return .failure(.networkError(error.localizedDescription))
         }
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "invalid response from server")
+            return .failure(.invalidResponse)
         }
 
         switch httpResponse.statusCode {
         case 200:
             do {
-                let result = try JSONDecoder().decode(EventResponse.self, from: data)
-                return SendResult(
-                    success: true,
-                    workspace: result.workspace,
-                    channel: result.channel,
-                    warnings: result.warnings,
-                    error: nil
-                )
+                let body = try JSONDecoder().decode(EventResponse.self, from: data)
+                return .success(SendResult(
+                    workspace: body.workspace,
+                    channel: body.channel,
+                    warnings: body.warnings
+                ))
             } catch {
-                return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "invalid response from server")
+                return .failure(.invalidResponse)
             }
-        case 400:
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "bad request")
-        case 401:
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "unauthorized — check your api key")
-        case 403:
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "forbidden")
-        case 429:
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "rate limit exceeded")
-        default:
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "unexpected status: \(httpResponse.statusCode)")
+        case 400: return .failure(.httpError(400, "bad request"))
+        case 401: return .failure(.httpError(401, "unauthorized — check your api key"))
+        case 403: return .failure(.httpError(403, "forbidden"))
+        case 429: return .failure(.httpError(429, "rate limit exceeded"))
+        default:  return .failure(.httpError(httpResponse.statusCode, "unexpected status: \(httpResponse.statusCode)"))
         }
     }
 }

@@ -23,11 +23,11 @@ public enum APIAlerts {
         await client.send(event)
     }
 
-    /// Never throws. Returns SendResult with success: false if not configured or on any error.
+    /// Returns `.success(SendResult)` on delivery, `.failure(ApiAlertsError)` otherwise.
     @discardableResult
-    public static func sendAsync(_ event: Event) async -> SendResult {
+    public static func sendAsync(_ event: Event) async -> Result<SendResult, ApiAlertsError> {
         guard let client = _sharedClient else {
-            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "client not configured")
+            return .failure(.notConfigured)
         }
         return await client.sendAsync(event)
     }

@@ -94,6 +94,24 @@ private func captureBodySession() -> (URLSession, () -> Data?) {
     return (session, { capturedBody })
 }
 
+// MARK: - Result helpers
+
+private func assertSuccess<E: Error>(_ result: Result<SendResult, E>, file: StaticString = #file, line: UInt = #line) -> SendResult? {
+    guard case .success(let sent) = result else {
+        XCTFail("Expected success but got failure", file: file, line: line)
+        return nil
+    }
+    return sent
+}
+
+private func assertFailure<E: Error>(_ result: Result<SendResult, E>, file: StaticString = #file, line: UInt = #line) -> E? {
+    guard case .failure(let error) = result else {
+        XCTFail("Expected failure but got success", file: file, line: line)
+        return nil
+    }
+    return error
+}
+
 // MARK: - Tests
 
 final class ClientTests: XCTestCase {
@@ -107,22 +125,22 @@ final class ClientTests: XCTestCase {
     func testEmptyApiKey_ReturnsError() async {
         let client = ApiAlertsClient("", session: successSession())
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "api key is missing")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "api key is missing")
     }
 
     func testWhitespaceApiKey_ReturnsError() async {
         let client = ApiAlertsClient("   ", session: successSession())
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "api key is missing")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "api key is missing")
     }
 
     func testEmptyMessage_ReturnsError() async {
         let client = ApiAlertsClient("key", session: successSession())
         let result = await client.sendAsync(Event(message: ""))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "message is required")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "message is required")
     }
 
     // ── HTTP status codes ─────────────────────────────────────────────────────
@@ -130,60 +148,59 @@ final class ClientTests: XCTestCase {
     func testSendAsync_Returns_SendResult_On200() async {
         let client = ApiAlertsClient("key", session: successSession(workspace: "W", channel: "C"))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertTrue(result.success)
-        XCTAssertEqual(result.workspace, "W")
-        XCTAssertEqual(result.channel, "C")
-        XCTAssertTrue(result.warnings.isEmpty)
-        XCTAssertNil(result.error)
+        let sent = assertSuccess(result)
+        XCTAssertEqual(sent?.workspace, "W")
+        XCTAssertEqual(sent?.channel, "C")
+        XCTAssertTrue(sent?.warnings.isEmpty ?? false)
     }
 
     func testSendAsync_Returns_Warnings_On200() async {
         let client = ApiAlertsClient("key", session: successSession(warnings: ["deprecated"]))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertTrue(result.success)
-        XCTAssertEqual(result.warnings, ["deprecated"])
+        let sent = assertSuccess(result)
+        XCTAssertEqual(sent?.warnings, ["deprecated"])
     }
 
     func testSendAsync_Returns_Error_On400() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 400))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "bad request")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "bad request")
     }
 
     func testSendAsync_Returns_Error_On401() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 401))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "unauthorized — check your api key")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "unauthorized — check your api key")
     }
 
     func testSendAsync_Returns_Error_On403() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 403))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "forbidden")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "forbidden")
     }
 
     func testSendAsync_Returns_Error_On429() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 429))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "rate limit exceeded")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "rate limit exceeded")
     }
 
     func testSendAsync_Returns_Error_On500() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 500))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "unexpected status: 500")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "unexpected status: 500")
     }
 
     func testSendAsync_Returns_Error_OnBadJson() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 200, body: "not json"))
         let result = await client.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "invalid response from server")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "invalid response from server")
     }
 
     // ── Request headers ───────────────────────────────────────────────────────
@@ -266,22 +283,21 @@ final class ClientTests: XCTestCase {
 
     func testAPIAlerts_SendAsync_Returns_NotConfigured_BeforeConfigure() async {
         let result = await APIAlerts.sendAsync(Event(message: "test"))
-        XCTAssertFalse(result.success)
-        XCTAssertEqual(result.error, "client not configured")
+        let error = assertFailure(result)
+        XCTAssertEqual(error?.localizedDescription, "client not configured")
     }
 
     func testAPIAlerts_Configure_InitializesClient() async {
         APIAlerts.configure("key", session: successSession(workspace: "W", channel: "C"))
         let result = await APIAlerts.sendAsync(Event(message: "test"))
-        XCTAssertTrue(result.success)
-        XCTAssertEqual(result.workspace, "W")
+        let sent = assertSuccess(result)
+        XCTAssertEqual(sent?.workspace, "W")
     }
 
     func testAPIAlerts_Configure_IsIdempotent() async {
         APIAlerts.configure("first-key", session: successSession())
         APIAlerts.configure("second-key") // should be ignored
-        let result = await APIAlerts.sendAsync(Event(message: "test"))
-        XCTAssertNotNil(result)
+        _ = await APIAlerts.sendAsync(Event(message: "test")) // should not crash
     }
 
     func testAPIAlerts_Send_IsNoOp_BeforeConfigure() async {

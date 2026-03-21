@@ -53,9 +53,9 @@ struct Network {
             do {
                 let body = try JSONDecoder().decode(EventResponse.self, from: data)
                 return .success(SendResult(
-                    workspace: body.workspace,
-                    channel: body.channel,
-                    warnings: body.warnings
+                    workspace: body.workspace ?? "",
+                    channel: body.channel ?? "",
+                    warnings: body.warnings ?? []
                 ))
             } catch {
                 return .failure(.invalidResponse)

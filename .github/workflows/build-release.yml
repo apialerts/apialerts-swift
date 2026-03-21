@@ -1,4 +1,5 @@
 name: Release
+
 on:
   push:
     branches:
@@ -18,7 +19,6 @@ jobs:
       - name: Test
         run: swift test
       - name: Send Release Alert
-        working-directory: ./GitHubAction
-        run: swift build && swift run GitHubAction --release
+        run: swift run --package-path sample -- --release
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

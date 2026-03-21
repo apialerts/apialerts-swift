@@ -19,7 +19,6 @@ jobs:
       - name: Test
         run: swift test
       - name: Send Build Alert
-        working-directory: ./GitHubAction
-        run: swift build && swift run GitHubAction --build
+        run: swift run --package-path sample -- --build
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

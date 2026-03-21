@@ -12,7 +12,7 @@ let package = Package(
         .executableTarget(
             name: "sample",
             dependencies: [
-                .product(name: "APIAlerts", package: "apialerts-swift")
+                .product(name: "APIAlerts", package: "APIAlerts")
             ],
             path: "Sources"
         ),

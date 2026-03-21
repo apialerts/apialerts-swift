@@ -1,76 +1,89 @@
-# API Alerts • Swift Client
+# API Alerts • Swift Package
 
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fapialerts%2Fapialerts-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/apialerts/apialerts-swift)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fapialerts%2Fapialerts-swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/apialerts/apialerts-swift)
 
-[GitHub](https://github.com/apialerts/apialerts-swift) • [Swift Package Index](https://swiftpackageindex.com/apialerts/apialerts-swift)
+[Swift Package Index](https://swiftpackageindex.com/apialerts/apialerts-swift) • [GitHub](https://github.com/apialerts/apialerts-swift) • [API Alerts](https://apialerts.com)
+
+Effortless project notifications. Send once, deliver everywhere.
 
 ## Installation
 
-Add the following dependency to your Package.swift file
+Add the package in Xcode via **File → Add Package Dependencies**:
+
+```
+https://github.com/apialerts/apialerts-swift
+```
+
+Or in `Package.swift`:
 
 ```swift
-let package = Package(
-    ...
-    dependencies: [
-        .package(url: "https://github.com/apialerts/apialerts-swift.git", exact: "<latest-version>")
-    ],
-    targets: [
-        .target(
-            ...
-            dependencies: [
-                .product(name: "APIAlerts", package: "apialerts-swift"),
-            ]
-        )
-    ]
+dependencies: [
+    .package(url: "https://github.com/apialerts/apialerts-swift", from: "2.0.0")
+]
 ```
 
-or install it via your xcode project
-```bash
-https://github.com/apialerts/apialerts-swift.git
-```
-
-Currently, apialerts-swift is only available as an SPM package.
-
-
-### Initialize the client
+## Quick Start
 
 ```swift
 import APIAlerts
-...
 
-// Set the default api key to use in all send() calls at any time in your app
-APIAlerts.configure(
-    apiKey: "your-api-key"
-)
+APIAlerts.configure("your-api-key")
+let result = await APIAlerts.sendAsync(Event(message: "Deploy complete"))
+if result.success {
+    print("Sent to \(result.workspace ?? "") (\(result.channel ?? "")")
+}
 ```
 
-Configuring the client is optional, but it allows you to set a default API Key for all send() calls. You must set an API key in the send() call if you do not configure the client.
+## Usage
 
-### Send Events
+### Global singleton (recommended)
 
-Quick one-liner to send a notification to your connected devices.
+Call `configure` once at startup, then use `send` / `sendAsync` anywhere.
 
 ```swift
-APIAlerts.send(
-    apiKey: "your-api-key",   // Optional, uses the key from ApiAlerts.client.configure() if not provided
-    channel: "your-channel",  // Optional, uses the default channel if not provided
-    message: "New App User!"  // Required
-)
+import APIAlerts
+
+APIAlerts.configure("your-api-key")
+
+// Fire-and-forget — never throws, logs errors to stderr
+await APIAlerts.send(Event(message: "Deploy complete"))
+
+// Or get the result back — never throws, check result.success
+let result = await APIAlerts.sendAsync(Event(message: "Deploy complete"))
+if result.success {
+    print("Sent to \(result.workspace ?? "") (\(result.channel ?? "")")
+} else {
+    print("Error: \(result.error ?? "unknown")")
+}
 ```
 
-Additional event properties can be set using the optional parameters.
+## Event Fields
+
+| Field     | Type                          | Required | Description                      |
+|-----------|-------------------------------|----------|----------------------------------|
+| `message` | `String`                      | Yes      | Main notification message        |
+| `channel` | `String?`                     | No       | Target channel name              |
+| `event`   | `String?`                     | No       | Event key for routing            |
+| `title`   | `String?`                     | No       | Short title                      |
+| `tags`    | `[String]?`                   | No       | Categorisation tags              |
+| `link`    | `String?`                     | No       | URL attached to the notification |
+| `data`    | `(any Encodable & Sendable)?` | No       | Arbitrary key-value metadata     |
+
+### Instance-based client
+
+Use `ApiAlertsClient` directly when you need multiple clients or full lifecycle control.
 
 ```swift
-APIAlerts.send(
-    apiKey: "your-api-key",        // Optional, uses the key from ApiAlerts.client.configure() if not provided
-    channel: "your-channel",       // Optional, uses the default channel if not provided
-    message: "New App User!",      // Required
-    tags: ["tag1", "tag2"],        // Optional tags
-    link: "https://apialerts.com"  // Optional link
-)
+let client = ApiAlertsClient("your-api-key", debug: true)
+let result = await client.sendAsync(Event(message: "Deploy complete"))
+if result.success {
+    print("Sent to \(result.workspace ?? "") (\(result.channel ?? "")")
+}
 ```
 
-The API Key provided in the send() function can be different from the default API Key set in the configure() function. This allows you to send events to different workspaces without changing the default API Key or managing multiple instances of the client.
+## Links
 
-The APIAlerts.sendAsync methods are also available if you need to wait for a successful execution. However, the send() functions are generally always preferred.
+- [Documentation](https://apialerts.com/docs)
+- [Sign up](https://apialerts.com)
+- [GitHub Issues](https://github.com/apialerts/apialerts-swift/issues)

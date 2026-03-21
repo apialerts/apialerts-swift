@@ -1,6 +1,2 @@
-import Foundation
-
-let API_URL = "https://api.apialerts.com"
-
-let INTEGRATION_NAME = "swift"
-let INTEGRATION_VERSION = "1.1.0"
+let integrationName = "swift"
+let integrationVersion = "2.0.0"

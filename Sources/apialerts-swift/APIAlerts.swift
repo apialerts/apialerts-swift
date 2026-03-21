@@ -1,86 +1,38 @@
-import SwiftUI
+import Foundation
 
-/// API Alerts Client
-///
-/// Shorthand for APIAlertsClient.client
-///
-public let APIAlerts = APIAlertsClient.client
+nonisolated(unsafe) private var _sharedClient: ApiAlertsClient?
 
-///
-/// API Alerts Client
-///
-public class APIAlertsClient {
+public enum APIAlerts {
 
-    public static let client = APIAlertsClient()
-
-    let alerts: Client = ClientImpl()
-
-    private init() {}
-
-    /// Configure the APIAlerts client
-    ///
-    /// Example:
-    /// ```
-    /// APIAlerts.configure(
-    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
-    ///     debug: true
-    /// )
-    /// ```
-    ///
-    /// Parameters:
-    /// apiKey: The APIAlerts project API key. Provide a default API Key to use for all send() requests
-    /// debug: Boolean Set to true to enable debug logging
-    /// Returns: Void
-    public func configure(apiKey: String, debug: Bool = false) {
-        alerts.configure(apiKey: apiKey, debug: debug)
+    /// Call once at startup. Subsequent calls are no-ops.
+    public static func configure(_ apiKey: String, debug: Bool = false, session: URLSession = .shared) {
+        guard _sharedClient == nil else { return }
+        _sharedClient = ApiAlertsClient(apiKey, debug: debug, session: session)
     }
 
-    /// Send an alert
-    ///
-    /// Example:
-    /// ```
-    /// APIAlerts.send(
-    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
-    ///     channel: "developer"
-    ///     message: "Swift package test",
-    ///     tags: ["swift", "apple"],
-    ///     link: "https://developer.apple.com/documentation/swift"
-    /// )
-    /// ```
-    ///
-    /// Parameters:
-    /// apiKey: The APIAlerts project API key. Overrides the default apiKey if set in configure()
-    /// channel: Optional channel to send the alert to. Uses the default channel set if not provided
-    /// message: The message to send
-    /// tags: Optional array of tags to associate with the message. Max of 10 tags with each tag length no greater than 50 characters. Non compliant tags will be dropped.
-    /// link: Optional link to associate with the message
-    /// Returns: Void
-    public func send(apiKey: String? = nil, channel: String? = nil, message: String, tags: [String]? = nil, link: String? = nil) {
-        alerts.send(apiKey: apiKey, channel: channel, message: message, tags: tags, link: link)
+    public static func setOverrides(integration: String, version: String, baseUrl: String) {
+        _sharedClient?.setOverrides(integration: integration, version: version, baseUrl: baseUrl)
     }
 
-    /// Send an alert
-    /// Async suspend function that will wait for a response
-    ///
-    /// Example:
-    /// ```
-    /// APIAlerts.send(
-    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
-    ///     channel: "developer"
-    ///     message: "Swift package test",
-    ///     tags: ["swift", "apple"],
-    ///     link: "https://developer.apple.com/documentation/swift"
-    /// )
-    /// ```
-    ///
-    /// Parameters:
-    /// apiKey: The APIAlerts project API key. Overrides the default apiKey if set in configure()
-    /// channel: Optional channel to send the alert to. Uses the default channel set if not provided
-    /// message: The message to send
-    /// tags: An array of tags to associate with the message. Max of 10 tags with each tag length no greater than 50 characters. Non compliant tags will be dropped.
-    /// link: A link to associate with the message
-    /// Returns: Void
-    public func sendAsync(apiKey: String? = nil, channel: String? = nil, message: String, tags: [String]? = nil, link: String? = nil) async {
-        await alerts.sendAsync(apiKey: apiKey, channel: channel, message: message, tags: tags, link: link)
+    /// Fire-and-forget. Logs "client not configured" to stderr if configure() was not called first.
+    public static func send(_ event: Event) async {
+        guard let client = _sharedClient else {
+            fputs("x (apialerts.com) Error: client not configured\n", stderr)
+            return
+        }
+        await client.send(event)
+    }
+
+    /// Never throws. Returns SendResult with success: false if not configured or on any error.
+    @discardableResult
+    public static func sendAsync(_ event: Event) async -> SendResult {
+        guard let client = _sharedClient else {
+            return SendResult(success: false, workspace: nil, channel: nil, warnings: [], error: "client not configured")
+        }
+        return await client.sendAsync(event)
+    }
+
+    internal static func reset() {
+        _sharedClient = nil
     }
 }

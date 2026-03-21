@@ -1,2 +1,2 @@
 let integrationName = "swift"
-let integrationVersion = "2.0.0"
+let integrationVersion = "1.2.0"

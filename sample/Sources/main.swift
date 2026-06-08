@@ -24,7 +24,7 @@ let link = "https://github.com/apialerts/apialerts-swift/actions"
 func handleResult(_ result: Result<SendResult, ApiAlertsError>) {
     switch result {
     case .success(let sent):
-        print("✓ Sent to \(sent.workspace) (\(sent.channel))")
+        print("✓ Sent to \(sent.workspace ?? "") (\(sent.channel ?? ""))")
     case .failure(let error):
         fputs("Error: \(error.localizedDescription)\n", stderr)
         exit(1)
@@ -71,7 +71,7 @@ if isBuild {
     let minimal = await APIAlerts.sendAsync(Event(message: "Swift SDK - minimal", channel: channel))
     switch minimal {
     case .success(let sent):
-        print("✓ sent to \(sent.workspace) (\(sent.channel))")
+        print("✓ sent to \(sent.workspace ?? "") (\(sent.channel ?? ""))")
     case .failure(let error):
         fputs("Error (minimal): \(error.localizedDescription)\n", stderr)
         exit(1)
@@ -88,7 +88,7 @@ if isBuild {
         ))
     switch full {
     case .success(let sent):
-        print("✓ sent to \(sent.workspace) (\(sent.channel))")
+        print("✓ sent to \(sent.workspace ?? "") (\(sent.channel ?? ""))")
         for w in sent.warnings { print("! Warning: \(w)") }
     case .failure(let error):
         fputs("Error (full): \(error.localizedDescription)\n", stderr)

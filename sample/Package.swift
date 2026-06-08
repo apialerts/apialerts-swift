@@ -6,7 +6,7 @@ let package = Package(
     name: "sample",
     platforms: [.macOS(.v12)],
     dependencies: [
-        .package(path: "..")
+        .package(name: "APIAlerts", path: "..")
     ],
     targets: [
         .executableTarget(

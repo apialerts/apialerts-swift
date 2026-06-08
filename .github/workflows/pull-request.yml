@@ -21,6 +21,6 @@ jobs:
       - name: Test
         run: swift test
       - name: Send Build Alert
-        run: swift run --package-path sample -- --build
+        run: swift run --package-path sample sample --build
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

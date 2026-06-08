@@ -18,6 +18,6 @@ jobs:
       - name: Lint
         run: swift format lint --strict --recursive Sources Tests sample/Sources
       - name: Send Publish Alert
-        run: swift run --package-path sample -- --publish
+        run: swift run --package-path sample sample --publish
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

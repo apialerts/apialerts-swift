@@ -21,6 +21,6 @@ jobs:
       - name: Test
         run: swift test
       - name: Send Release Alert
-        run: swift run --package-path sample -- --release
+        run: swift run --package-path sample sample --release
         env:
           APIALERTS_API_KEY: ${{ secrets.APIALERTS_API_KEY }}

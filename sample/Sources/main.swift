@@ -40,7 +40,8 @@ if isBuild {
                 event: "ci.sdk.build.swift",
                 title: "Build Passed",
                 tags: ["CI/CD", "Swift", "Build"],
-                link: link
+                link: link,
+                data: ["integration": "swift"]
             )))
 
 } else if isRelease {
@@ -52,7 +53,8 @@ if isBuild {
                 event: "ci.sdk.release.swift",
                 title: "Release Build Passed",
                 tags: ["CI/CD", "Swift", "Build"],
-                link: link
+                link: link,
+                data: ["integration": "swift"]
             )))
 
 } else if isPublish {
@@ -64,7 +66,8 @@ if isBuild {
                 event: "ci.sdk.publish.swift",
                 title: "Published",
                 tags: ["CI/CD", "Swift", "Deploy"],
-                link: link
+                link: link,
+                data: ["integration": "swift"]
             )))
 
 } else if isIntegrationTests {
@@ -84,7 +87,8 @@ if isBuild {
             event: "sdk.test",
             title: "Integration Test",
             tags: ["CI/CD", "Swift"],
-            link: link
+            link: link,
+            data: ["integration": "swift"]
         ))
     switch full {
     case .success(let sent):

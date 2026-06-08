@@ -10,7 +10,7 @@ struct Network {
         session: URLSession = .shared,
         integration: String = integrationName,
         version: String = integrationVersion,
-        baseUrl: String = "https://api.apialerts.com"
+        baseUrl: String = defaultBaseUrl
     ) {
         self.session = session
         self.integration = integration
@@ -19,11 +19,11 @@ struct Network {
     }
 
     func post(apiKey: String, event: Event) async -> Result<SendResult, ApiAlertsError> {
-        guard let url = URL(string: baseUrl + "/event") else {
+        guard let url = URL(string: baseUrl) else {
             return .failure(.invalidResponse)
         }
 
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutSeconds)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -52,19 +52,20 @@ struct Network {
         case 200:
             do {
                 let body = try JSONDecoder().decode(EventResponse.self, from: data)
-                return .success(SendResult(
-                    workspace: body.workspace ?? "",
-                    channel: body.channel ?? "",
-                    warnings: body.warnings ?? []
-                ))
+                return .success(
+                    SendResult(
+                        workspace: body.workspace,
+                        channel: body.channel,
+                        warnings: body.warnings ?? []
+                    ))
             } catch {
                 return .failure(.invalidResponse)
             }
         case 400: return .failure(.httpError(400, "bad request"))
-        case 401: return .failure(.httpError(401, "unauthorized — check your api key"))
+        case 401: return .failure(.httpError(401, "unauthorized, check your api key"))
         case 403: return .failure(.httpError(403, "forbidden"))
         case 429: return .failure(.httpError(429, "rate limit exceeded"))
-        default:  return .failure(.httpError(httpResponse.statusCode, "unexpected status: \(httpResponse.statusCode)"))
+        default: return .failure(.httpError(httpResponse.statusCode, "unexpected status: \(httpResponse.statusCode)"))
         }
     }
 }

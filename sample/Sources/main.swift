@@ -3,9 +3,9 @@ import Foundation
 
 let args = Array(CommandLine.arguments.dropFirst())
 
-let isBuild            = args.contains("--build")
-let isRelease          = args.contains("--release")
-let isPublish          = args.contains("--publish")
+let isBuild = args.contains("--build")
+let isRelease = args.contains("--release")
+let isPublish = args.contains("--publish")
 let isIntegrationTests = args.contains("--integration-tests")
 
 let channelIdx = args.firstIndex(of: "--channel")
@@ -32,34 +32,40 @@ func handleResult(_ result: Result<SendResult, ApiAlertsError>) {
 }
 
 if isBuild {
-    handleResult(await APIAlerts.sendAsync(Event(
-        message: "Swift SDK - PR build success",
-        channel: "developer",
-        event: "ci.build",
-        title: "Build Passed",
-        tags: ["CI/CD", "Swift", "Build"],
-        link: link
-    )))
+    handleResult(
+        await APIAlerts.sendAsync(
+            Event(
+                message: "Swift SDK - PR build success",
+                channel: "developer",
+                event: "ci.sdk.build.swift",
+                title: "Build Passed",
+                tags: ["CI/CD", "Swift", "Build"],
+                link: link
+            )))
 
 } else if isRelease {
-    handleResult(await APIAlerts.sendAsync(Event(
-        message: "Swift SDK - Build for publish success",
-        channel: "developer",
-        event: "ci.release",
-        title: "Release Build Passed",
-        tags: ["CI/CD", "Swift", "Build"],
-        link: link
-    )))
+    handleResult(
+        await APIAlerts.sendAsync(
+            Event(
+                message: "Swift SDK - Build for publish success",
+                channel: "developer",
+                event: "ci.sdk.release.swift",
+                title: "Release Build Passed",
+                tags: ["CI/CD", "Swift", "Build"],
+                link: link
+            )))
 
 } else if isPublish {
-    handleResult(await APIAlerts.sendAsync(Event(
-        message: "Swift SDK - Swift Package Index publish success",
-        channel: "releases",
-        event: "ci.publish",
-        title: "Published",
-        tags: ["CI/CD", "Swift", "Deploy"],
-        link: link
-    )))
+    handleResult(
+        await APIAlerts.sendAsync(
+            Event(
+                message: "Swift SDK - Swift Package Index publish success",
+                channel: "releases",
+                event: "ci.sdk.publish.swift",
+                title: "Published",
+                tags: ["CI/CD", "Swift", "Deploy"],
+                link: link
+            )))
 
 } else if isIntegrationTests {
     let minimal = await APIAlerts.sendAsync(Event(message: "Swift SDK - minimal", channel: channel))
@@ -71,14 +77,15 @@ if isBuild {
         exit(1)
     }
 
-    let full = await APIAlerts.sendAsync(Event(
-        message: "Swift SDK - full",
-        channel: channel,
-        event: "sdk.test",
-        title: "Integration Test",
-        tags: ["CI/CD", "Swift"],
-        link: link
-    ))
+    let full = await APIAlerts.sendAsync(
+        Event(
+            message: "Swift SDK - full",
+            channel: channel,
+            event: "sdk.test",
+            title: "Integration Test",
+            tags: ["CI/CD", "Swift"],
+            link: link
+        ))
     switch full {
     case .success(let sent):
         print("✓ sent to \(sent.workspace) (\(sent.channel))")

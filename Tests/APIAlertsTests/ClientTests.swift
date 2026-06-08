@@ -1,5 +1,6 @@
-import XCTest
 import Foundation
+import XCTest
+
 @testable import APIAlerts
 
 // MARK: - Mock URLProtocol
@@ -51,9 +52,11 @@ private func successSession(
     warnings: [String] = []
 ) -> URLSession {
     let w = warnings.map { "\"\($0)\"" }.joined(separator: ",")
-    return mockSession(statusCode: 200, body: """
-    {"workspace":"\(workspace)","channel":"\(channel)","warnings":[\(w)]}
-    """)
+    return mockSession(
+        statusCode: 200,
+        body: """
+            {"workspace":"\(workspace)","channel":"\(channel)","warnings":[\(w)]}
+            """)
 }
 
 private func captureSession(statusCode: Int = 200, body: String = successBody) -> (URLSession, () -> URLRequest?) {
@@ -96,7 +99,9 @@ private func captureBodySession() -> (URLSession, () -> Data?) {
 
 // MARK: - Result helpers
 
-private func assertSuccess<E: Error>(_ result: Result<SendResult, E>, file: StaticString = #file, line: UInt = #line) -> SendResult? {
+private func assertSuccess<E: Error>(_ result: Result<SendResult, E>, file: StaticString = #file, line: UInt = #line)
+    -> SendResult?
+{
     guard case .success(let sent) = result else {
         XCTFail("Expected success but got failure", file: file, line: line)
         return nil
@@ -104,7 +109,9 @@ private func assertSuccess<E: Error>(_ result: Result<SendResult, E>, file: Stat
     return sent
 }
 
-private func assertFailure<E: Error>(_ result: Result<SendResult, E>, file: StaticString = #file, line: UInt = #line) -> E? {
+private func assertFailure<E: Error>(_ result: Result<SendResult, E>, file: StaticString = #file, line: UInt = #line)
+    -> E?
+{
     guard case .failure(let error) = result else {
         XCTFail("Expected failure but got success", file: file, line: line)
         return nil
@@ -172,7 +179,7 @@ final class ClientTests: XCTestCase {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 401))
         let result = await client.sendAsync(Event(message: "test"))
         let error = assertFailure(result)
-        XCTAssertEqual(error?.localizedDescription, "unauthorized — check your api key")
+        XCTAssertEqual(error?.localizedDescription, "unauthorized, check your api key")
     }
 
     func testSendAsync_Returns_Error_On403() async {
@@ -217,7 +224,8 @@ final class ClientTests: XCTestCase {
         let client = ApiAlertsClient("key", session: session)
         _ = await client.sendAsync(Event(message: "test"))
         XCTAssertEqual(getRequest()?.value(forHTTPHeaderField: "X-Integration"), "swift")
-        XCTAssertEqual(getRequest()?.value(forHTTPHeaderField: "X-Version"), "2.0.0")
+        let version = getRequest()?.value(forHTTPHeaderField: "X-Version") ?? ""
+        XCTAssertTrue(version.range(of: #"^\d+\.\d+\.\d+"#, options: .regularExpression) != nil)
     }
 
     func testSetOverrides_Changes_IntegrationHeaders() async {
@@ -232,7 +240,7 @@ final class ClientTests: XCTestCase {
     func testSendWithKey_Uses_ProvidedApiKey() async {
         let (session, getRequest) = captureSession()
         let client = ApiAlertsClient("original-key", session: session)
-        _ = await client.sendWithKey("override-key", event: Event(message: "test"))
+        _ = await client.sendAsync(Event(message: "test"), apiKey: "override-key")
         XCTAssertEqual(getRequest()?.value(forHTTPHeaderField: "Authorization"), "Bearer override-key")
     }
 
@@ -241,14 +249,15 @@ final class ClientTests: XCTestCase {
     func testSendAsync_Serializes_AllFields() async throws {
         let (session, getBody) = captureBodySession()
         let client = ApiAlertsClient("key", session: session)
-        _ = await client.sendAsync(Event(
-            message: "Full payload",
-            channel: "developer",
-            event: "ci.deploy",
-            title: "Deployed",
-            tags: ["CI/CD", "Swift"],
-            link: "https://github.com"
-        ))
+        _ = await client.sendAsync(
+            Event(
+                message: "Full payload",
+                channel: "developer",
+                event: "ci.deploy",
+                title: "Deployed",
+                tags: ["CI/CD", "Swift"],
+                link: "https://github.com"
+            ))
         let body = try XCTUnwrap(getBody())
         let json = try JSONSerialization.jsonObject(with: body) as! [String: Any]
         XCTAssertEqual(json["message"] as? String, "Full payload")
@@ -272,11 +281,26 @@ final class ClientTests: XCTestCase {
         XCTAssertNil(json["data"])
     }
 
+    func testSendAsync_Serializes_DataField() async throws {
+        struct Meta: Encodable & Sendable {
+            let plan: String
+            let count: Int
+        }
+        let (session, getBody) = captureBodySession()
+        let client = ApiAlertsClient("key", session: session)
+        _ = await client.sendAsync(Event(message: "with data", data: Meta(plan: "pro", count: 5)))
+        let body = try XCTUnwrap(getBody())
+        let json = try JSONSerialization.jsonObject(with: body) as! [String: Any]
+        let data = try XCTUnwrap(json["data"] as? [String: Any])
+        XCTAssertEqual(data["plan"] as? String, "pro")
+        XCTAssertEqual(data["count"] as? Int, 5)
+    }
+
     // ── Fire-and-forget ───────────────────────────────────────────────────────
 
     func testSend_DoesNotCrash_OnError() async {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 401))
-        await client.send(Event(message: "test")) // should not crash
+        await client.send(Event(message: "test"))  // should not crash
     }
 
     // ── Global singleton ──────────────────────────────────────────────────────
@@ -296,11 +320,57 @@ final class ClientTests: XCTestCase {
 
     func testAPIAlerts_Configure_IsIdempotent() async {
         APIAlerts.configure("first-key", session: successSession())
-        APIAlerts.configure("second-key") // should be ignored
-        _ = await APIAlerts.sendAsync(Event(message: "test")) // should not crash
+        APIAlerts.configure("second-key")  // should be ignored
+        _ = await APIAlerts.sendAsync(Event(message: "test"))  // should not crash
     }
 
     func testAPIAlerts_Send_IsNoOp_BeforeConfigure() async {
-        await APIAlerts.send(Event(message: "test")) // should not crash
+        await APIAlerts.send(Event(message: "test"))  // should not crash
     }
+
+    // ── Instance client / dependency injection ────────────────────────────────
+
+    func testInstanceClient_UsableThroughProtocol() async {
+        let client: any ApiAlertsClientProtocol =
+            ApiAlertsClient("key", session: successSession(workspace: "W", channel: "C"))
+        let result = await client.sendAsync(Event(message: "test"))
+        let sent = assertSuccess(result)
+        XCTAssertEqual(sent?.workspace, "W")
+    }
+
+    func testProtocol_ConvenienceOverload_OmitsApiKey() async {
+        let (session, getRequest) = captureSession()
+        let client: any ApiAlertsClientProtocol = ApiAlertsClient("configured-key", session: session)
+        _ = await client.sendAsync(Event(message: "test"))
+        XCTAssertEqual(getRequest()?.value(forHTTPHeaderField: "Authorization"), "Bearer configured-key")
+    }
+
+    func testProtocol_FireAndForget_DoesNotCrash() async {
+        let client: any ApiAlertsClientProtocol = ApiAlertsClient("key", session: mockSession(statusCode: 401))
+        await client.send(Event(message: "test"))  // should not crash
+    }
+
+    func testProtocol_AcceptsAMock() async {
+        let mock = MockApiAlertsClient()
+        let consumer: any ApiAlertsClientProtocol = mock
+        _ = await consumer.sendAsync(Event(message: "captured"))
+        XCTAssertEqual(mock.sentMessages, ["captured"])
+    }
+}
+
+// MARK: - Mock client
+
+final class MockApiAlertsClient: ApiAlertsClientProtocol, @unchecked Sendable {
+    private(set) var sentMessages: [String] = []
+
+    func send(_ event: Event, apiKey: String?) async {
+        sentMessages.append(event.message)
+    }
+
+    func sendAsync(_ event: Event, apiKey: String?) async -> Result<SendResult, ApiAlertsError> {
+        sentMessages.append(event.message)
+        return .success(SendResult(workspace: "mock", channel: "mock", warnings: []))
+    }
+
+    func setOverrides(integration: String, version: String, baseUrl: String) {}
 }

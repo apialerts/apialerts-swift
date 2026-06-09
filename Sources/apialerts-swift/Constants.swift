@@ -1,6 +1,4 @@
-import Foundation
-
-let API_URL = "https://api.apialerts.com"
-
-let INTEGRATION_NAME = "swift"
-let INTEGRATION_VERSION = "1.1.0"
+let integrationName = "swift"
+let integrationVersion = "1.2.0"
+let defaultBaseUrl = "https://api.apialerts.com/event"
+let timeoutSeconds = 30.0

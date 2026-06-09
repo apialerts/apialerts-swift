@@ -1,5 +1,4 @@
-// swift-tools-version: 5.10
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -9,8 +8,8 @@ let package = Package(
         .iOS(.v14),
         .macOS(.v11),
         .visionOS(.v1),
-        .watchOS(.v4),
-        .tvOS(.v12)
+        .watchOS(.v7),
+        .tvOS(.v14)
     ],
     products: [
         .library(
@@ -18,16 +17,16 @@ let package = Package(
             targets: ["APIAlerts"]
         ),
     ],
-    dependencies: [],
     targets: [
         .target(
             name: "APIAlerts",
-            dependencies: []
+            path: "Sources/apialerts-swift"
         ),
         .testTarget(
             name: "APIAlertsTests",
-            dependencies: ["APIAlerts"]
+            dependencies: ["APIAlerts"],
+            path: "Tests/APIAlertsTests",
+            swiftSettings: [.swiftLanguageMode(.v5)]
         ),
-    ],
-    swiftLanguageVersions: [.v5]
+    ]
 )

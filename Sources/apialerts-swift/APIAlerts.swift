@@ -1,86 +1,52 @@
-import SwiftUI
+import Foundation
+import os
 
-/// API Alerts Client
-///
-/// Shorthand for APIAlertsClient.client
-///
-public let APIAlerts = APIAlertsClient.client
+nonisolated(unsafe) private var _sharedClient: ApiAlertsClient?
 
-///
-/// API Alerts Client
-///
-public class APIAlertsClient {
+internal let logger = Logger(subsystem: "com.apialerts.sdk", category: "client")
 
-    public static let client = APIAlertsClient()
+/// Global API Alerts singleton. Call ``configure(_:debug:session:)`` once, then
+/// ``send(_:apiKey:)`` / ``sendAsync(_:apiKey:)`` anywhere. For dependency
+/// injection or multiple keys, use ``ApiAlertsClient`` directly instead.
+public enum APIAlerts {
 
-    let alerts: Client = ClientImpl()
-
-    private init() {}
-
-    /// Configure the APIAlerts client
+    /// Configure the singleton. First call wins; later calls are no-ops.
     ///
-    /// Example:
-    /// ```
-    /// APIAlerts.configure(
-    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
-    ///     debug: true
-    /// )
-    /// ```
-    ///
-    /// Parameters:
-    /// apiKey: The APIAlerts project API key. Provide a default API Key to use for all send() requests
-    /// debug: Boolean Set to true to enable debug logging
-    /// Returns: Void
-    public func configure(apiKey: String, debug: Bool = false) {
-        alerts.configure(apiKey: apiKey, debug: debug)
+    /// - Parameters:
+    ///   - apiKey: Workspace API key.
+    ///   - debug: Log success and warnings (critical errors always log).
+    ///   - session: `URLSession` for delivery; inject one for pooling, proxies, or test mocks.
+    public static func configure(_ apiKey: String, debug: Bool = false, session: URLSession = .shared) {
+        guard _sharedClient == nil else { return }
+        _sharedClient = ApiAlertsClient(apiKey, debug: debug, session: session)
     }
 
-    /// Send an alert
-    ///
-    /// Example:
-    /// ```
-    /// APIAlerts.send(
-    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
-    ///     channel: "developer"
-    ///     message: "Swift package test",
-    ///     tags: ["swift", "apple"],
-    ///     link: "https://developer.apple.com/documentation/swift"
-    /// )
-    /// ```
-    ///
-    /// Parameters:
-    /// apiKey: The APIAlerts project API key. Overrides the default apiKey if set in configure()
-    /// channel: Optional channel to send the alert to. Uses the default channel set if not provided
-    /// message: The message to send
-    /// tags: Optional array of tags to associate with the message. Max of 10 tags with each tag length no greater than 50 characters. Non compliant tags will be dropped.
-    /// link: Optional link to associate with the message
-    /// Returns: Void
-    public func send(apiKey: String? = nil, channel: String? = nil, message: String, tags: [String]? = nil, link: String? = nil) {
-        alerts.send(apiKey: apiKey, channel: channel, message: message, tags: tags, link: link)
+    /// Override the `X-Integration` / `X-Version` headers and base URL. Internal use.
+    /// Call after ``configure(_:debug:session:)``.
+    public static func setOverrides(integration: String, version: String, baseUrl: String) {
+        _sharedClient?.setOverrides(integration: integration, version: version, baseUrl: baseUrl)
     }
 
-    /// Send an alert
-    /// Async suspend function that will wait for a response
-    ///
-    /// Example:
-    /// ```
-    /// APIAlerts.send(
-    ///     apiKey: "abcd-efgh-ijkl-mnop-qrst",
-    ///     channel: "developer"
-    ///     message: "Swift package test",
-    ///     tags: ["swift", "apple"],
-    ///     link: "https://developer.apple.com/documentation/swift"
-    /// )
-    /// ```
-    ///
-    /// Parameters:
-    /// apiKey: The APIAlerts project API key. Overrides the default apiKey if set in configure()
-    /// channel: Optional channel to send the alert to. Uses the default channel set if not provided
-    /// message: The message to send
-    /// tags: An array of tags to associate with the message. Max of 10 tags with each tag length no greater than 50 characters. Non compliant tags will be dropped.
-    /// link: A link to associate with the message
-    /// Returns: Void
-    public func sendAsync(apiKey: String? = nil, channel: String? = nil, message: String, tags: [String]? = nil, link: String? = nil) async {
-        await alerts.sendAsync(apiKey: apiKey, channel: channel, message: message, tags: tags, link: link)
+    /// Fire-and-forget delivery. Never throws. `apiKey` overrides the configured key for this call.
+    public static func send(_ event: Event, apiKey: String? = nil) async {
+        guard let client = _sharedClient else {
+            logger.error("x (apialerts.com) Error: client not configured")
+            return
+        }
+        await client.send(event, apiKey: apiKey)
+    }
+
+    /// Awaitable delivery. Never throws; branch on the `Result`. `apiKey` overrides
+    /// the configured key for this call.
+    @discardableResult
+    public static func sendAsync(_ event: Event, apiKey: String? = nil) async -> Result<SendResult, ApiAlertsError> {
+        guard let client = _sharedClient else {
+            return .failure(.notConfigured)
+        }
+        return await client.sendAsync(event, apiKey: apiKey)
+    }
+
+    internal static func reset() {
+        _sharedClient = nil
     }
 }

@@ -1,8 +1,7 @@
 import Foundation
 
-struct EventResponse: Codable {
+struct EventResponse: Decodable {
     let workspace: String?
     let channel: String?
-    let remainingQuota: Int?
-    let errors: [String]?
+    let warnings: [String]?
 }

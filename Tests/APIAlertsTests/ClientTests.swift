@@ -298,9 +298,9 @@ final class ClientTests: XCTestCase {
 
     // ── Fire-and-forget ───────────────────────────────────────────────────────
 
-    func testSend_DoesNotCrash_OnError() async {
+    func testSend_DoesNotCrash_OnError() {
         let client = ApiAlertsClient("key", session: mockSession(statusCode: 401))
-        await client.send(Event(message: "test"))  // should not crash
+        client.send(Event(message: "test"))  // should not crash
     }
 
     // ── Global singleton ──────────────────────────────────────────────────────
@@ -324,8 +324,8 @@ final class ClientTests: XCTestCase {
         _ = await APIAlerts.sendAsync(Event(message: "test"))  // should not crash
     }
 
-    func testAPIAlerts_Send_IsNoOp_BeforeConfigure() async {
-        await APIAlerts.send(Event(message: "test"))  // should not crash
+    func testAPIAlerts_Send_IsNoOp_BeforeConfigure() {
+        APIAlerts.send(Event(message: "test"))  // should not crash
     }
 
     // ── Instance client / dependency injection ────────────────────────────────
@@ -345,9 +345,9 @@ final class ClientTests: XCTestCase {
         XCTAssertEqual(getRequest()?.value(forHTTPHeaderField: "Authorization"), "Bearer configured-key")
     }
 
-    func testProtocol_FireAndForget_DoesNotCrash() async {
+    func testProtocol_FireAndForget_DoesNotCrash() {
         let client: any ApiAlertsClientProtocol = ApiAlertsClient("key", session: mockSession(statusCode: 401))
-        await client.send(Event(message: "test"))  // should not crash
+        client.send(Event(message: "test"))  // should not crash
     }
 
     func testProtocol_AcceptsAMock() async {
@@ -363,7 +363,7 @@ final class ClientTests: XCTestCase {
 final class MockApiAlertsClient: ApiAlertsClientProtocol, @unchecked Sendable {
     private(set) var sentMessages: [String] = []
 
-    func send(_ event: Event, apiKey: String?) async {
+    func send(_ event: Event, apiKey: String?) {
         sentMessages.append(event.message)
     }
 

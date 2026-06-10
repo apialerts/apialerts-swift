@@ -27,13 +27,14 @@ public enum APIAlerts {
         _sharedClient?.setOverrides(integration: integration, version: version, baseUrl: baseUrl)
     }
 
-    /// Fire-and-forget delivery. Never throws. `apiKey` overrides the configured key for this call.
-    public static func send(_ event: Event, apiKey: String? = nil) async {
+    /// Fire-and-forget delivery. Returns immediately; delivery runs in a detached
+    /// task. Never throws. `apiKey` overrides the configured key for this call.
+    public static func send(_ event: Event, apiKey: String? = nil) {
         guard let client = _sharedClient else {
             logger.error("x (apialerts.com) Error: client not configured")
             return
         }
-        await client.send(event, apiKey: apiKey)
+        client.send(event, apiKey: apiKey)
     }
 
     /// Awaitable delivery. Never throws; branch on the `Result`. `apiKey` overrides

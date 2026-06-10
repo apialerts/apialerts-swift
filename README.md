@@ -15,11 +15,19 @@ Add the package in Xcode via **File → Add Package Dependencies**:
 https://github.com/apialerts/apialerts-swift
 ```
 
-Or in `Package.swift`:
+Or in `Package.swift`, add the package to `dependencies` and the product to your target:
 
 ```swift
 dependencies: [
     .package(url: "https://github.com/apialerts/apialerts-swift", exact: "1.2.0")
+],
+targets: [
+    .target(
+        name: "YourTarget",
+        dependencies: [
+            .product(name: "APIAlerts", package: "apialerts-swift")
+        ]
+    )
 ]
 ```
 
@@ -31,7 +39,7 @@ dependencies: [
 import APIAlerts
 
 APIAlerts.configure("your-api-key")
-await APIAlerts.send(Event(message: "Deploy complete"))
+APIAlerts.send(Event(message: "Deploy complete"))
 ```
 
 ## Usage
@@ -46,7 +54,7 @@ import APIAlerts
 APIAlerts.configure("your-api-key")
 
 // Fire-and-forget. Never throws, drops errors silently unless debug is on.
-await APIAlerts.send(Event(message: "Deploy complete"))
+APIAlerts.send(Event(message: "Deploy complete"))
 
 // Or get the result back. Never throws; switch on the Result.
 let result = await APIAlerts.sendAsync(Event(message: "Deploy complete"))
@@ -81,7 +89,7 @@ let event = Event(
     data: ["commit": "a1b2c3d", "branch": "main"]
 )
 
-await APIAlerts.send(event)
+APIAlerts.send(event)
 ```
 
 `data` takes anything `Encodable` (a dictionary as above, or your own `Codable` struct) and is available to non-push destinations for templating.
@@ -101,7 +109,7 @@ await APIAlerts.send(event)
 Pass an `apiKey` as the optional last argument to override the configured key for a single call.
 
 ```swift
-await APIAlerts.send(Event(message: "Deploy complete"), apiKey: "other-workspace-api-key")
+APIAlerts.send(Event(message: "Deploy complete"), apiKey: "other-workspace-api-key")
 
 let result = await APIAlerts.sendAsync(
     Event(message: "Deploy complete"),
@@ -119,8 +127,8 @@ import APIAlerts
 struct DeployNotifier {
     let alerts: any ApiAlertsClientProtocol
 
-    func notify() async {
-        await alerts.send(Event(message: "Deploy complete"))
+    func notify() {
+        alerts.send(Event(message: "Deploy complete"))
     }
 }
 
@@ -139,7 +147,7 @@ let client = ApiAlertsClient("your-api-key", debug: true, session: mockSession)
 | Method | Description |
 |---|---|
 | `APIAlerts.configure(_:debug:session:)` | Initialise the singleton. First call wins; subsequent calls are no-ops. |
-| `APIAlerts.send(_:apiKey:)` | Fire-and-forget. Never throws, drops errors silently unless `debug` is on. |
+| `APIAlerts.send(_:apiKey:)` | Fire-and-forget. Synchronous, returns immediately; delivery runs in a detached task. Never throws, drops errors silently unless `debug` is on. |
 | `APIAlerts.sendAsync(_:apiKey:)` | Awaitable, returns `Result<SendResult, ApiAlertsError>`. Never throws. |
 | `ApiAlertsClient(_:debug:session:)` | Constructable instance client for dependency injection. Conforms to `ApiAlertsClientProtocol`; exposes the same `send` / `sendAsync` / `setOverrides`. |
 

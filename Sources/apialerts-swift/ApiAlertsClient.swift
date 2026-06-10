@@ -24,19 +24,22 @@ public final class ApiAlertsClient: ApiAlertsClientProtocol {
         network.baseUrl = baseUrl
     }
 
-    /// Fire-and-forget. Logs critical errors always; HTTP errors/success only when debug is enabled.
-    public func send(_ event: Event, apiKey: String? = nil) async {
-        let key = apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? apiKey! : self.apiKey
-        guard !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            logger.error("x (apialerts.com) Error: api key is missing")
-            return
+    /// Fire-and-forget. Returns immediately; delivery runs in a detached task.
+    /// Never throws. Logs critical errors always; HTTP errors/success only when debug is enabled.
+    public func send(_ event: Event, apiKey: String? = nil) {
+        Task {
+            let result = await sendAsync(event, apiKey: apiKey)
+            // sendAsync already logs everything when debug is on. Otherwise still
+            // surface the always-on critical errors (missing key, empty message).
+            if !debug, case .failure(let error) = result {
+                switch error {
+                case .apiKeyMissing, .messageRequired, .notConfigured:
+                    logger.error("x (apialerts.com) Error: \(error.localizedDescription)")
+                default:
+                    break
+                }
+            }
         }
-        guard !event.message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            logger.error("x (apialerts.com) Error: message is required")
-            return
-        }
-        let result = await network.post(apiKey: key, event: event)
-        if debug { logResult(result) }
     }
 
     /// Returns a `Result`: `.success(SendResult)` on delivery, `.failure(ApiAlertsError)` otherwise.

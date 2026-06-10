@@ -5,8 +5,9 @@ import Foundation
 /// and a stub in tests.
 public protocol ApiAlertsClientProtocol: Sendable {
 
-    /// Fire-and-forget delivery. `apiKey` overrides the configured key for this call.
-    func send(_ event: Event, apiKey: String?) async
+    /// Fire-and-forget delivery. Returns immediately; delivery runs in a detached task.
+    /// `apiKey` overrides the configured key for this call.
+    func send(_ event: Event, apiKey: String?)
 
     /// Awaitable delivery. `apiKey` overrides the configured key for this call.
     @discardableResult
@@ -19,8 +20,8 @@ public protocol ApiAlertsClientProtocol: Sendable {
 // Default the optional apiKey; protocol requirements can't carry defaults.
 extension ApiAlertsClientProtocol {
 
-    public func send(_ event: Event) async {
-        await send(event, apiKey: nil)
+    public func send(_ event: Event) {
+        send(event, apiKey: nil)
     }
 
     @discardableResult

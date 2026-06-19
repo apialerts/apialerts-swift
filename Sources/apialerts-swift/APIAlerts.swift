@@ -1,9 +1,13 @@
 import Foundation
-import os
+import Logging
+
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
 
 nonisolated(unsafe) private var _sharedClient: ApiAlertsClient?
 
-internal let logger = Logger(subsystem: "com.apialerts.sdk", category: "client")
+internal let logger = Logger(label: "com.apialerts.sdk")
 
 /// Global API Alerts singleton. Call ``configure(_:debug:session:)`` once, then
 /// ``send(_:apiKey:)`` / ``sendAsync(_:apiKey:)`` anywhere. For dependency

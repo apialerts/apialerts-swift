@@ -13,10 +13,10 @@ public struct Event: Sendable {
     /// workspace default channel when omitted.
     public var channel: String?
 
-    /// Identifies what kind of thing happened. Optional but recommended.
-    /// Use dotted notation (e.g. `ci.deploy.success`, `payment.failed`,
-    /// `user.signup`) so routing rules can match glob patterns like `ci.*`
-    /// or `*.failed`.
+    /// What kind of thing happened. Optional but recommended. Routers match
+    /// this value with Unix glob (fnmatch): dotted keys like `ci.deploy.success`
+    /// match `ci.*`, and free-form keys like `User Signup` match `User *`.
+    /// Dotted notation is just a tidy convention, not a requirement.
     public var event: String?
 
     /// Short headline some destinations render separately from the message body.

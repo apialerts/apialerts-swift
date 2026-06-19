@@ -19,7 +19,7 @@ Or in `Package.swift`, add the package to `dependencies` and the product to your
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apialerts/apialerts-swift", exact: "1.2.0")
+    .package(url: "https://github.com/apialerts/apialerts-swift", exact: "1.3.0")
 ],
 targets: [
     .target(
@@ -98,7 +98,7 @@ APIAlerts.send(event)
 |-------|------|----------|-------------|
 | `message` | `String` | Yes | Human-readable notification text. This is what appears on the push notification lock screen. |
 | `channel` | `String?` | No | Workspace channel the push notification fires on. Defaults to the workspace default channel when omitted. |
-| `event` | `String?` | No | Identifies what kind of thing happened. Optional but recommended. Use dotted notation (e.g. `ci.deploy.success`, `payment.failed`, `user.signup`) so routing rules can match glob patterns like `ci.*` or `*.failed`. |
+| `event` | `String?` | No | What kind of thing happened. Optional but recommended. Routers match this value with Unix glob (fnmatch): dotted keys like `ci.deploy.success` match `ci.*`, and free-form keys like `User Signup` match `User *`. Dotted notation is just a tidy convention, not a requirement. |
 | `title` | `String?` | No | Short headline some destinations render separately from the message body. |
 | `tags` | `[String]?` | No | Categorisation tags for filtering and search. |
 | `link` | `String?` | No | URL associated with the event. Available as a deeplink for push notifications and as a call-to-action for routed destinations. |

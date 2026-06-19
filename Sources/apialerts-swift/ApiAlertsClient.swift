@@ -1,5 +1,9 @@
 import Foundation
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 /// A constructable client, for dependency injection or multiple keys in one
 /// process. The ``APIAlerts`` singleton wraps a default instance of this.
 public final class ApiAlertsClient: ApiAlertsClientProtocol {

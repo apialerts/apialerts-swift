@@ -3,6 +3,10 @@ import XCTest
 
 @testable import APIAlerts
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 // MARK: - Mock URLProtocol
 
 final class MockURLProtocol: URLProtocol {

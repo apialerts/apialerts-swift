@@ -1,6 +1,10 @@
 import Foundation
 import Logging
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 nonisolated(unsafe) private var _sharedClient: ApiAlertsClient?
 
 internal let logger = Logger(label: "com.apialerts.sdk")
